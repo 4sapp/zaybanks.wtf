@@ -1,0 +1,129 @@
+---
+import Icon from './Icon.astro';
+const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const isHome = path === '/';
+const parent = path.startsWith('/blog/') ? { href: '/blog', label: 'Blog' } : { href: '/', label: 'Home' };
+
+const navLinks = [
+    { href: '/', label: 'Home' },
+    { href: '/blog', label: 'Blog' },
+    { href: '/portfolio', label: 'Portfolio' },
+    { href: '/about', label: 'About' },
+];
+---
+<header class="fixed inset-x-0 top-0 z-40 flex items-center justify-between px-5 md:px-10 py-4 pointer-events-none">
+    <div class="flex items-center gap-3">
+        <a href="/" data-transition="Home" data-transition-dir="up" class="pointer-events-auto rounded-xl border-2 border-transparent p-1 transition hover:border-[#dc2626] hover:bg-neutral-950/70">
+            <img alt="Inicio" class="size-11 md:size-12 transition-transform duration-300 hover:-rotate-6 hover:scale-110" src="/favicon.svg" width="48" height="48" />
+        </a>
+        {!isHome && (
+            <a
+                href={parent.href}
+                data-transition={parent.label}
+                data-transition-dir="up"
+                class="group pointer-events-auto flex items-center gap-2 rounded-full border-2 border-white/25 bg-neutral-950/70 py-2 pl-3 pr-4 text-white backdrop-blur-sm transition-colors duration-200 hover:border-white hover:bg-white hover:text-neutral-950"
+            >
+                <Icon name="arrow-left" class="text-sm transition-transform duration-200 group-hover:-translate-x-1" />
+                <span class="font-anton text-lg uppercase leading-none tracking-wider">Volver</span>
+            </a>
+        )}
+    </div>
+    <button
+        id="menu-toggle"
+        type="button"
+        aria-expanded="false"
+        aria-controls="menu-panel"
+        class="group pointer-events-auto flex items-center gap-3 rounded-full border-2 border-[#dc2626] bg-neutral-950/70 py-2 pl-5 pr-4 text-white backdrop-blur-sm transition-colors duration-200 hover:cursor-pointer hover:bg-[#dc2626] hover:text-neutral-950 aria-expanded:border-neutral-950 aria-expanded:bg-neutral-950 aria-expanded:text-white aria-expanded:hover:bg-white aria-expanded:hover:text-neutral-950"
+    >
+        <span data-label class="font-anton text-lg uppercase leading-none tracking-wider">Menu</span>
+        <span class="relative block h-3 w-6" aria-hidden="true">
+            <span class="absolute right-0 top-0 h-[2px] w-6 rounded-full bg-current transition-all duration-300 group-aria-expanded:top-1/2 group-aria-expanded:-translate-y-1/2 group-aria-expanded:rotate-45"></span>
+            <span class="absolute bottom-0 right-0 h-[2px] w-4 rounded-full bg-current transition-all duration-300 group-hover:w-6 group-aria-expanded:bottom-1/2 group-aria-expanded:w-6 group-aria-expanded:translate-y-1/2 group-aria-expanded:-rotate-45"></span>
+        </span>
+    </button>
+</header>
+
+<div id="menu-backdrop" class="fixed top-0 left-0 z-20 w-full h-full bg-[#5e165e]" style="transform: translateY(-100%)" aria-hidden="true"></div>
+<div id="menu-panel" class="fixed top-0 left-0 z-30 w-full h-full bg-red-900" style="transform: translateY(-100%)" inert>
+    <nav class="flex h-full items-center justify-center" aria-label="Menú principal">
+        <ul class="flex flex-col space-y-6 px-6 py-16 sm:p-16">
+            {navLinks.map((link) => (
+                <li>
+                    <a
+                        href={link.href}
+                        data-transition={link.label}
+                        aria-current={path === link.href ? 'page' : undefined}
+                        class="menu-link text-white text-6xl sm:text-7xl md:text-8xl font-anton"
+                    >{link.label}</a>
+                </li>
+            ))}
+        </ul>
+    </nav>
+</div>
+
+<script>
+    import { gsap } from 'gsap';
+    import SplitType from 'split-type';
+
+    const toggle = document.getElementById('menu-toggle')!;
+    const backdrop = document.getElementById('menu-backdrop')!;
+    const panel = document.getElementById('menu-panel')!;
+    const label = toggle.querySelector<HTMLElement>('[data-label]')!;
+    const root = document.documentElement;
+
+    // Animate with yPercent only (the inline translateY(-100%) is just the pre-JS state).
+    gsap.set([backdrop, panel], { y: 0, yPercent: -100 });
+
+    let open = false;
+    let tl: gsap.core.Timeline | null = null;
+
+    const applyState = () => {
+        toggle.setAttribute('aria-expanded', String(open));
+        label.textContent = open ? 'Cerrar' : 'Menu';
+        root.classList.toggle('overflow-hidden', open);
+        panel.toggleAttribute('inert', !open);
+    };
+
+    const setOpen = (value: boolean) => {
+        if (value === open) return;
+        open = value;
+        applyState();
+
+        // Reverse smoothly from wherever the previous animation was, instead of ignoring the click.
+        tl?.kill();
+        tl = open
+            ? gsap.timeline()
+                .to(backdrop, { yPercent: 0, duration: 0.4, ease: 'power2.out' })
+                .to(panel, { yPercent: 0, duration: 0.5, ease: 'power2.out' }, '-=0.2')
+            : gsap.timeline()
+                .to(panel, { yPercent: -100, duration: 0.4, ease: 'power2.in' })
+                .to(backdrop, { yPercent: -100, duration: 0.3, ease: 'power2.in' }, '-=0.2');
+    };
+
+    /** Close instantly, without animation (used when the page is restored from cache). */
+    const forceClose = () => {
+        tl?.kill();
+        open = false;
+        applyState();
+        gsap.set([backdrop, panel], { y: 0, yPercent: -100 });
+    };
+
+    toggle.addEventListener('click', () => setOpen(!open));
+    document.addEventListener('keydown', (e) => { if (e.key === 'Escape') setOpen(false); });
+    document.addEventListener('menu:close', () => setOpen(false));
+    window.addEventListener('pageshow', (e) => { if (e.persisted) forceClose(); });
+
+    // Letter hover effect (pointer devices only, so touch doesn't leave letters stuck mid-air).
+    if (window.matchMedia('(hover: hover)').matches) {
+        document.querySelectorAll<HTMLElement>('.menu-link').forEach((link) => {
+            const split = new SplitType(link, { types: 'chars' });
+            const chars = split.chars ?? [];
+            link.addEventListener('mouseenter', () => {
+                gsap.to(chars, { y: -10, stagger: 0.04, duration: 0.3, ease: 'power2.out', overwrite: true });
+            });
+            link.addEventListener('mouseleave', () => {
+                gsap.to(chars, { y: 0, stagger: 0.04, duration: 0.3, ease: 'power2.in', overwrite: true });
+            });
+        });
+    }
+</script>

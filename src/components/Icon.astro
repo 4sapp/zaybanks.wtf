@@ -1,0 +1,19 @@
+---
+import { iconData, type IconName } from '../lib/icons';
+
+interface Props {
+    name: IconName;
+    class?: string;
+}
+
+const { name, class: className = '' } = Astro.props;
+const { viewBox, width, height, d } = iconData(name);
+---
+<svg
+    xmlns="http://www.w3.org/2000/svg"
+    viewBox={viewBox}
+    aria-hidden="true"
+    focusable="false"
+    class:list={['inline-block h-[1em] shrink-0 fill-current align-[-0.125em]', className]}
+    style={`width: ${(width / height).toFixed(4)}em`}
+><path d={d} /></svg>

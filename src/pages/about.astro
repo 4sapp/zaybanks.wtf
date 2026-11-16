@@ -1,0 +1,33 @@
+---
+import Layout from '../layouts/Layout.astro';
+import { githubHref, GITHUB_USER } from '../lib/contact';
+
+---
+<Layout title="About | Juan Sebastian">
+    <div class="flex flex-col min-h-screen overflow-x-hidden items-center hover:cursor-default">
+        <div class="flex flex-col w-full px-4 md:px-8 lg:px-16 bg-gradient-to-b to-60% from-transparent to-neutral-950 pt-32 md:pt-44 pb-24 md:pb-40">
+            <div class="flex flex-col justify-center items-center space-y-12">
+                <h1 class="font-mono text-2xl sm:text-3xl md:text-4xl flex flex-row flex-wrap justify-center items-center"><span class="text-green-500">juan@portfolio:~$&nbsp;</span><span class="text-white">whoami</span></h1>
+                <div class="flex flex-col-reverse lg:flex-row items-center gap-10 lg:gap-12">
+                    <div class="flex flex-col space-y-8 font-mono max-w-3xl">
+                        <h2 class="text-2xl md:text-3xl text-white text-center lg:text-left">
+                            My name is <span class="text-cyan-400">Juan Sebastian</span>
+                        </h2>
+                        <div class="text-xl md:text-2xl text-gray-300 space-y-5 text-center lg:text-left">
+                            <p>I'm a graphics programmer from Colombia 🇨🇴.</p>
+                            <p>This is my corner of the internet: the <a class="text-cyan-400 hover:underline" href="/portfolio" data-transition="Portfolio">projects</a> I build and the <a class="text-cyan-400 hover:underline" href="/blog" data-transition="Blog">things I learn</a> along the way.</p>
+                            <p>You can follow my work on GitHub as <a class="text-cyan-400 hover:underline" href={githubHref}>@{GITHUB_USER}</a>.</p>
+                        </div>
+                    </div>
+                    <img
+                        src="/img/profile.webp"
+                        class="rounded-full border-4 border-gray-800 object-cover w-48 h-48 md:w-64 md:h-64 lg:w-[250px] lg:h-[250px] hover:border-cyan-700 transition-colors duration-300"
+                        alt="Juan Sebastian"
+                        width="250"
+                        height="250"
+                    />
+                </div>
+            </div>
+        </div>
+    </div>
+</Layout>

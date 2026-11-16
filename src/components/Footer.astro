@@ -1,0 +1,187 @@
+---
+import Icon from './Icon.astro';
+import { githubHref } from '../lib/contact';
+
+const W = 1440;
+const H = 360;
+
+/**
+ * Builds a row of flame tongues as a single SVG path, rising from `base`.
+ * Tongues whose centre falls inside `gap` are skipped (room for the mascot).
+ */
+function flames(
+    tongues: Array<[x: number, width: number, height: number, lean: number]>,
+    base: number,
+    gap?: [number, number],
+) {
+    let d = `M0 ${H} L0 ${base}`;
+    let cursor = 0;
+    for (const [cx, w, h, lean] of tongues) {
+        if (gap && cx > gap[0] && cx < gap[1]) continue;
+        const x0 = cx - w / 2;
+        const x1 = cx + w / 2;
+        const tx = cx + lean;
+        const ty = base - h;
+        d += ` L${Math.max(x0, cursor)} ${base}`;
+        // Bulging left side that narrows into a sharp, hooked tip; S-curve back down.
+        d += ` C${x0 - w * 0.2} ${base - h * 0.55} ${tx - w * 0.08} ${ty + h * 0.32} ${tx} ${ty}`;
+        d += ` C${tx + w * 0.02} ${ty + h * 0.38} ${x1 + w * 0.12} ${base - h * 0.3} ${x1} ${base}`;
+        cursor = x1;
+    }
+    return `${d} L${W} ${base} L${W} ${H} Z`;
+}
+
+// [centre x, width, height, lean]
+const back = flames([
+    [60, 210, 250, 70], [250, 240, 320, -80], [450, 220, 270, 85], [640, 220, 220, -60],
+    [820, 230, 240, 60], [1020, 240, 300, -90], [1230, 230, 320, 80], [1420, 210, 250, -70],
+], 330);
+
+const front = flames([
+    [0, 180, 190, 55], [165, 200, 250, -70], [340, 180, 170, 65], [490, 170, 215, -55],
+    [955, 170, 225, 55], [1110, 190, 170, -65], [1275, 200, 260, 75], [1440, 180, 195, -55],
+], 300, [560, 880]);
+
+const year = new Date().getFullYear();
+
+const nav = [
+    { href: '/', label: 'Home' },
+    { href: '/blog', label: 'Blog' },
+    { href: '/portfolio', label: 'Portfolio' },
+    { href: '/about', label: 'About' },
+];
+
+const path = Astro.url.pathname.replace(/\/+$/, '') || '/';
+const isCurrent = (href: string) => (href === '/' ? path === '/' : path === href || path.startsWith(`${href}/`));
+// Forward = going deeper (falls), back to Home = rises, like the header's Volver button.
+const dirFor = (href: string) => (href === '/' ? 'up' : undefined);
+
+const socials = [
+    { href: githubHref, label: 'GitHub', icon: 'github' as const },
+];
+---
+<footer class="site-footer relative mt-16 overflow-hidden text-neutral-950 font-fira">
+    <!-- Heat glow so the page fades into the fire -->
+    <div class="pointer-events-none absolute inset-x-0 -top-48 h-[28rem] bg-[radial-gradient(ellipse_70%_60%_at_50%_100%,rgba(220,38,38,0.28),rgba(94,22,94,0.18)_45%,transparent_75%)]" aria-hidden="true"></div>
+    <svg class="relative block w-full h-auto -mb-px" viewBox={`0 0 ${W} ${H}`} aria-hidden="true">
+        <path class="flame flame-back" d={back} fill="#5e165e" />
+
+        <!-- Mascot: a terminal peeking over the fire -->
+        <g class="mascot" stroke="#dc2626" stroke-width="8" stroke-linejoin="round" stroke-linecap="round">
+            <rect x="590" y="130" width="260" height="210" rx="30" fill="#0a0a0a" />
+            <rect x="618" y="156" width="204" height="150" rx="14" fill="none" stroke-width="5" opacity=".55" />
+            <path d="M660 236 q22 -22 44 0" fill="none" />
+            <path d="M736 236 q22 -22 44 0" fill="none" />
+            <path d="M632 120 l-14 -38 M808 120 l14 -38" fill="none" />
+            <g class="bang">
+                <path d="M902 40 l40 12 l-34 92 l-22 -6 Z" fill="#0a0a0a" />
+                <circle cx="896" cy="176" r="15" fill="#0a0a0a" />
+            </g>
+        </g>
+
+        <path class="flame flame-front" d={front} fill="#dc2626" />
+        <rect x="0" y="300" width={W} height="60" fill="#dc2626" />
+        <rect class="cursor" x="706" y="272" width="28" height="9" fill="#dc2626" />
+
+        <!-- Hands gripping the edge -->
+        <g fill="#0a0a0a" stroke="#dc2626" stroke-width="8" stroke-linejoin="round">
+            <rect x="566" y="282" width="78" height="44" rx="10" transform="rotate(-8 605 304)" />
+            <rect x="796" y="282" width="78" height="44" rx="10" transform="rotate(8 835 304)" />
+        </g>
+    </svg>
+
+    <div class="relative bg-[#dc2626] px-6 md:px-10 pt-8 md:pt-4">
+        <div class="mx-auto grid max-w-screen-2xl gap-10 md:grid-cols-3 md:items-start">
+            <nav aria-label="Footer">
+                <h2 class="font-anton text-2xl uppercase tracking-wide mb-4">Navegación</h2>
+                <ul class="grid grid-cols-2 gap-x-8 gap-y-1 max-w-xs">
+                    {nav.map((link) => (
+                        <li>
+                            <a
+                                href={link.href}
+                                data-transition={link.label}
+                                data-transition-dir={dirFor(link.href)}
+                                aria-current={isCurrent(link.href) ? 'page' : undefined}
+                                class="group inline-flex items-center gap-2 py-1 font-anton text-xl uppercase tracking-wide transition-colors hover:text-white aria-[current=page]:text-white"
+                            >
+                                <Icon name="arrow-right" class="text-sm -ml-5 opacity-0 transition-all duration-200 group-hover:ml-0 group-hover:opacity-100 group-aria-[current=page]:ml-0 group-aria-[current=page]:opacity-100" />
+                                {link.label}
+                            </a>
+                        </li>
+                    ))}
+                </ul>
+            </nav>
+
+            <div class="flex flex-col items-start md:items-center text-left md:text-center">
+                <h2 class="font-anton text-2xl uppercase tracking-wide mb-3">¡Hola! 👋</h2>
+                <p class="text-lg mb-5">¿Tienes un proyecto en mente? Hablemos.</p>
+                <a href={githubHref} class="rounded-full bg-neutral-950 px-8 py-3 font-semibold text-lg text-red-500 transition hover:bg-[#5e165e] hover:text-white">
+                    <Icon name="github" class="mr-1" /> Mi GitHub
+                </a>
+            </div>
+
+            <div class="flex flex-col items-start md:items-end gap-4">
+                {socials.length > 0 && (
+                    <ul class="flex gap-3">
+                        {socials.map((s) => (
+                            <li>
+                                <a href={s.href} aria-label={s.label} class="grid size-11 place-items-center rounded-full bg-neutral-950 text-red-500 text-lg transition hover:bg-[#5e165e] hover:text-white">
+                                    <Icon name={s.icon} />
+                                </a>
+                            </li>
+                        ))}
+                    </ul>
+                )}
+                <p class="font-anton text-xl tracking-wide">© {year} Juan Sebastian</p>
+                <div class="flex flex-wrap items-center gap-3 md:justify-end">
+                    <a
+                        href="/legal"
+                        data-transition="Aviso legal"
+                        aria-current={isCurrent('/legal') ? 'page' : undefined}
+                        class="text-sm underline underline-offset-4 decoration-2 transition-colors hover:text-white aria-[current=page]:text-white"
+                    >Aviso legal</a>
+                    <span aria-hidden="true">·</span>
+                    <a href="https://astro.build" class="inline-flex items-center gap-2 rounded-lg border-2 border-neutral-950 px-3 py-1 text-sm transition hover:bg-neutral-950 hover:text-red-500">
+                        <Icon name="rocket" /> Hecho con Astro
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <p class="sr-only">Juan Sebastian</p>
+        <svg class="mt-10 block w-full h-auto" viewBox="0 0 1000 132" aria-hidden="true">
+            <text x="0" y="128" textLength="1000" lengthAdjust="spacingAndGlyphs" class="font-anton" font-size="150" fill="#0a0a0a">JUAN SEBASTIAN</text>
+        </svg>
+    </div>
+</footer>
+
+<style>
+    .flame {
+        transform-box: fill-box;
+        transform-origin: bottom center;
+    }
+    .flame-back { animation: flicker 3.2s ease-in-out infinite alternate; }
+    .flame-front { animation: flicker 2.4s ease-in-out infinite alternate-reverse; }
+    .bang {
+        transform-box: fill-box;
+        transform-origin: bottom center;
+        animation: wobble 1.8s ease-in-out infinite;
+    }
+    .cursor { animation: blink 1s step-end infinite; }
+
+    @keyframes flicker {
+        from { transform: scaleY(1) skewX(0deg); }
+        to { transform: scaleY(1.06) skewX(-1.5deg); }
+    }
+    @keyframes wobble {
+        0%, 100% { transform: rotate(0deg); }
+        50% { transform: rotate(8deg); }
+    }
+    @keyframes blink {
+        50% { opacity: 0; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        .flame, .bang, .cursor { animation: none; }
+    }
+</style>

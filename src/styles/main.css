@@ -1,0 +1,46 @@
+@import "tailwindcss"; 
+@config "../../tailwind.config.js";
+::-webkit-scrollbar {
+    display: none;
+}
+
+@theme {
+    --font-fira: "Fira Sans", "sans-serif";
+    --font-anton: "Anton", "sans-serif";
+}
+/* ---------- Markdown content ---------- */
+
+@layer components {
+    /* Aviso legal */
+    .prose-legal h1 { @apply font-anton text-5xl md:text-6xl uppercase tracking-wide mb-2; }
+    .prose-legal h2 { @apply font-anton text-2xl md:text-3xl uppercase tracking-wide text-[#dc2626] mt-10 mb-3; }
+    .prose-legal p { @apply text-gray-300 leading-relaxed mb-4; }
+    .prose-legal a { @apply text-sky-400 hover:underline; }
+    .prose-legal strong { @apply text-white font-semibold; }
+    .prose-legal ul { @apply list-disc pl-6 mb-4 space-y-1 text-gray-300; }
+    .prose-legal ol { @apply list-decimal pl-6 mb-4 space-y-1 text-gray-300; }
+
+    /* Blog posts */
+    .prose-post { @apply text-lg leading-relaxed; }
+    .prose-post > * + * { @apply mt-5; }
+    .prose-post :is(h1, h2, h3) { @apply relative font-fira text-white scroll-mt-28 cursor-pointer; }
+    .prose-post :is(h1, h2, h3)::before { content: '#'; @apply absolute -left-7 text-gray-600 opacity-0 transition-opacity; }
+    .prose-post :is(h1, h2, h3):hover::before { @apply opacity-100; }
+    .prose-post h1 { @apply text-4xl mt-12 mb-6; }
+    .prose-post h2 { @apply text-3xl mt-10 mb-4; }
+    .prose-post h3 { @apply text-2xl mt-8 mb-3; }
+    .prose-post p { @apply text-white; }
+    .prose-post a { @apply text-sky-400 hover:text-sky-600 hover:underline transition; }
+    .prose-post strong { @apply font-semibold text-white; }
+    .prose-post ul { @apply list-disc pl-8 space-y-2; }
+    .prose-post ol { @apply list-decimal pl-8 space-y-2; }
+    .prose-post li::marker { @apply text-[#dc2626]; }
+    .prose-post blockquote { @apply border-l-4 border-[#dc2626] pl-4 italic text-gray-300; }
+    .prose-post img { @apply rounded-xl; }
+    .prose-post hr { @apply border-neutral-800; }
+    .prose-post :not(pre) > code { @apply rounded bg-neutral-800 px-1.5 py-0.5 text-[0.9em]; }
+    .prose-post pre { @apply overflow-x-auto rounded-lg border-2 border-neutral-700 p-4 text-sm leading-6; }
+    .prose-post table { @apply w-full border-collapse overflow-hidden rounded-xl border-2 border-neutral-900; }
+    .prose-post th { @apply border-b-2 border-neutral-800 px-4 py-3 text-left; }
+    .prose-post td { @apply border-b border-neutral-900 px-4 py-2; }
+}

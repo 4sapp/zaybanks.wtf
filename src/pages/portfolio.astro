@@ -1,0 +1,40 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Icon from '../components/Icon.astro';
+import { projects } from '../data/projects';
+
+---
+<Layout title="Portfolio | Juan Sebastian">
+    <div class="w-full overflow-x-hidden flex flex-col items-center min-h-screen px-4 md:px-8 space-y-8 md:space-y-16">
+        <div class="flex flex-col pt-24 md:pt-32 items-center">
+            <h1 class="text-white font-semibold text-5xl md:text-6xl py-4">Portfolio</h1>
+        </div>
+        <div class="flex flex-wrap justify-center gap-8 w-full max-w-7xl mx-auto">
+            {projects.map((project) => (
+                <article class="group w-full max-w-lg bg-neutral-900 rounded flex flex-col border-2 border-zinc-600 overflow-hidden transition hover:scale-105 hover:border-[#dc2626]">
+                    <a href={project.href} class="relative block h-56 overflow-hidden bg-[radial-gradient(ellipse_at_bottom,#dc2626_0%,#5e165e_55%,#0a0a0a_100%)]" aria-label={`Ver ${project.title} en GitHub`}>
+                        <div class="absolute inset-0 bg-[repeating-linear-gradient(0deg,transparent_0_3px,rgba(0,0,0,0.25)_3px_4px)]" aria-hidden="true"></div>
+                        <span class="absolute inset-0 flex items-center justify-center px-6 text-center font-anton uppercase text-white text-5xl md:text-6xl tracking-wide drop-shadow-[0_4px_0_#0a0a0a] transition-transform duration-300 group-hover:scale-110">
+                            {project.title}
+                        </span>
+                        <Icon name="github" class="absolute bottom-3 right-4 text-2xl text-white/80" />
+                    </a>
+                    <div class="px-8 flex flex-col items-center py-6 space-y-4 text-center">
+                        <h2 class="text-white font-semibold text-2xl md:text-3xl">
+                            <a href={project.href} class="hover:underline hover:text-cyan-500 transition">{project.title}</a>
+                        </h2>
+                        <ul class="flex flex-wrap justify-center gap-2">
+                            {project.tags.map((tag) => (
+                                <li class="rounded-full border border-white/15 bg-white/5 px-3 py-1 text-sm text-gray-200">{tag}</li>
+                            ))}
+                        </ul>
+                        <p class="text-gray-200 text-base md:text-lg break-words hover:cursor-default">{project.description}</p>
+                        <a href={project.href} class="py-3 md:py-4 px-6 md:px-8 rounded font-semibold flex flex-row items-center gap-2 text-lg md:text-xl border-2 bg-cyan-900 text-white border-cyan-700 transition hover:bg-cyan-700 hover:border-cyan-900">
+                            <Icon name="bolt" /> Go to
+                        </a>
+                    </div>
+                </article>
+            ))}
+        </div>
+    </div>
+</Layout>
